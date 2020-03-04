@@ -70,10 +70,10 @@ exports.sourceNodes = async (
     createContentDigest,
     reporter
   },
-  { name, remote, branch, patterns = `**`, depth = 1, contributors }
+  { name, remote, branch, patterns = `**`, local, depth = 1, contributors }
 ) => {
   const programDir = store.getState().program.directory;
-  const localPath = require("path").join(
+  const localPath = local || require("path").join(
     programDir,
     `.cache`,
     `gatsby-source-git`,
