@@ -13,10 +13,11 @@ async function getTargetBranch(repo, branch) {
   if (typeof branch !== `string`) {
     // Find either the branch name or HEAD if in detached head.
     branch = (await repo.raw(["rev-parse", "--abbrev-ref", "HEAD"])).trim();
-    if (branch === "HEAD") {
-      // Detached head has no branch
-      return branch;
-    }
+  }
+
+  if (branch === "HEAD") {
+    // Detached head has no branch
+    return branch;
   }
 
   // Turn 'branch' into 'origin/branch' (or whatever it's tracking)
@@ -55,13 +56,15 @@ async function getRepo(path, remote, branch, depth) {
   } else if (await isAlreadyCloned(remote, path)) {
     const repo = await Git(path);
     const target = await getTargetBranch(repo, branch);
-    // Refresh our shallow clone with the latest commit.
-    if( depth && depth !== 'all' ) {
-      await repo.fetch([`--depth`, depth]);
-    } else {
-      await repo.fetch();
+    if (target !== "HEAD") {
+      // Refresh our shallow clone with the latest commit.
+      if( depth && depth !== 'all' ) {
+        await repo.fetch([`--depth`, depth]);
+      } else {
+        await repo.fetch();
+      }
+      await repo.reset([`--hard`, target]);
     }
-    await repo.reset([`--hard`, target]);
     return repo;
   } else {
     throw new Error(`Can't clone to target destination: ${path}`);
