@@ -79,7 +79,7 @@ module.exports = {
         name: `repo-one`,
         remote: `https://bitbucket.org/stevetweeddale/markdown-test.git`,
         branch: `develop`,
-        // Tailor which files get imported eg. import the docs folder from a codebase.
+        // Only import the docs folder from a codebase.
         patterns: `docs/**`
       }
     },
