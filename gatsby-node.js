@@ -41,6 +41,19 @@ async function parseContributors(repo, path) {
   }));
 }
 
+async function getLog(repo, path, {pretty, count = 1}) {
+  const args = ['log'];
+  if( count > 0 ) {
+    args.push(`-${count}`);
+  }
+  if( pretty ) {
+    args.push(`--pretty=${pretty}`);
+  }
+  args.push('--');
+  args.push(path);
+  return repo.raw(args).then( x => x.trim() );
+}
+
 async function getRepo(path, remote, branch, depth) {
   // If the directory doesn't exist or is empty, clone. This will be the case if
   // our config has changed because Gatsby trashes the cache dir automatically
@@ -81,8 +94,16 @@ exports.sourceNodes = async (
     createContentDigest,
     reporter
   },
-  { name, remote, branch, patterns = `**`, local, depth = 1, contributors }
-) => {
+  {
+    name,
+    remote,
+    branch,
+    patterns = `**`,
+    local,
+    depth = 1,
+    contributors,
+    log
+}) => {
   const programDir = store.getState().program.directory;
   const localPath = local || require("path").join(
     programDir,
@@ -145,6 +166,10 @@ exports.sourceNodes = async (
     // Add contributors if requested.
     if (wantFileContributors) {
       fileNode.gitContributors = await parseContributors(repo, path);
+    }
+
+    if (log) {
+      fileNode.gitLog = await getLog(repo, path, log);
     }
 
     // Add a link to the git remote node
